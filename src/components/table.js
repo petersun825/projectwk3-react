@@ -1,7 +1,8 @@
 import React, {Component} from 'react'
 import Header from './header'
-import PropTypes from 'prop-types';
-import {Paper, Table, TableBody, TableCell, TableHead, TableRow, withStyles} from "material-ui";
+import {Button, Paper, Table, TableBody, TableCell, TableHead, TableRow, withStyles} from "material-ui";
+import {HOST} from "../configs/config";
+import axios from "axios";
 
 const styles = theme => ({
     root: {
@@ -19,13 +20,11 @@ class TableComponent extends Component {
         this.state = {
             data: [],
             limit: 120,
-            save: false,
-            itemSaved: 'Not Saved',
-            saveColumn: []
-           
+            showingSaved: false, 
         };
 
-        this.handleLimit = this.handleLimit.bind(this)
+        this.handleLimit = this.handleLimit.bind(this);
+        this.handleViewUsers = this.handleViewUsers.bind(this);
     }
 
     componentDidMount() {
@@ -36,7 +35,7 @@ class TableComponent extends Component {
         fetch(`https://data.cityofnewyork.us/resource/buex-bi6w.json?$limit=${this.state.limit}`)
             .then(response => response.json())
             .then(data => {
-                this.setState({data: data});
+                this.setState({data});
             })
             .catch(error => {
                 alert('Can not load data ' + error.status)
@@ -51,48 +50,126 @@ class TableComponent extends Component {
         }, 700);
     }
 
-    toggleEditSave = () => {
-        // saveColumn.id = data.request_id;
-        // var joined = this.state.saveColumn.concat();
-        // this.setState({ saveColumn: joined })
-        const save = !this.state.save;
-        this.setState({save});
-      };
+    handleSaveBtnClick = async (newCity, Id) => {
+        try {
+            fetch.path('/city/${id}', newCity);
+            console.log("after .patch statement");
+        } catch (error) {
+            console.log("trouble retriving information");
+            console.log(error);
+        }
+    }
+    // handleSaveBtnClick(data) {
+    //     fetch(`${HOST}`, {
+    //         method: 'POST',
+    //         headers: {
+    //             'Accept': 'application/json',
+    //             'Content-Type': 'application/json',
+    //         },
+    //         body: JSON.stringify(data)
+    //     }).then(result => {
+    //         console.log('SAVED');
+    //     });
+    // }
+
+    handleRemoveBtnClick(id) {
+        fetch(`${HOST}${id}`, {
+            method: 'DELETE'
+        }).then(result => {
+            if (result.status === 200) {
+                let temp = this.state.data;
+                var indexOf = temp.indexOf(this.state.data.find(k => k.id === id));
+                temp.splice(indexOf,1);
+                this.setState({data: temp});
+            }
+        }).catch(error => {
+            console.log(error, ' ERROR ');
+        })
+    }
+
+
+    handleViewUsers() {
+        let {showingSaved} = this.state;
+        if (!showingSaved) {
+            fetch(HOST)
+                .then(response => response.json())
+                .then(data => {
+                    this.setState({data: data, showingSaved: !this.state.showingSaved})
+                })
+                .catch(error => {
+                    alert('Can not load data ' + error.status)
+                });
+        } else {
+            fetch(`https://randomuser.me/api/?inc=id,name,login&results=${this.state.limit}&nat=us`)
+                .then(response => response.json())
+                .then(data => {
+                    this.setState({data: data.results, showingSaved: !this.state.showingSaved});
+                })
+                .catch(error => {
+                    alert('Can not load data ' + error.status)
+                });
+        }
+    }
 
     render() {
         const {classes} = this.props;
         return (
             <div>
-                <Header handleLimit={this.handleLimit.bind(this)}/>
+                <Header handleLimit={this.handleLimit.bind(this)}
+                        handleViewUsers={this.handleViewUsers.bind(this)}/>
                 <Paper className={classes.root}>
+             
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell>Short title</TableCell>
+                                <TableCell>Section</TableCell>
+                                <TableCell>ID</TableCell>
                                 <TableCell>Agency Name</TableCell>
-                                <TableCell>Request ID</TableCell>
-                                <TableCell>Section Name</TableCell>
-                                <TableCell>Start date</TableCell>
-                                <TableCell>Status</TableCell>
+                                <TableCell>TItle</TableCell>
+                                <TableCell>Start Date</TableCell>
+                                <TableCell>Actions</TableCell>
                             </TableRow>
                         </TableHead>
-                        <TableBody>
-                            {this.state.data.map((k, i) => {
-                                return (
-                                    <TableRow key={i}>
-                                        <TableCell>{k.short_title} </TableCell>
-                                        <TableCell>{k.agency_name}</TableCell>
-                                        <TableCell>{k.request_id} </TableCell>
-                                        <TableCell>{k.section_name}</TableCell>
-                                        <TableCell>{k.start_date}</TableCell>
-                                        <TableCell> <span>{this.state.itemSaved}</span>
-                                                    <button variant="raised" color = "primary" onClick={this.toggleEditSave}>
-                                                    { this.state.save ? 'Saved' : 'Save'} </button> 
-
-                                        </TableCell>
-                                    </TableRow>)
-                            })}
-                        </TableBody>
+                    
+                            <TableBody>
+                                {this.state.data.map((k, i) => {
+                                    return (
+                                        <TableRow key={i}>
+                                            <TableCell>{k.section_name}</TableCell>
+                                            <TableCell>{k.request_id}</TableCell>
+                                            <TableCell>{k.agency_name}</TableCell>
+                                            <TableCell>{k.short_title}</TableCell>
+                                            <TableCell>{k.start_date}</TableCell>
+                                            <TableCell>
+                                                <Button color="primary" variant="raised"
+                                                        onClick={() => this.handleSaveBtnClick({
+                                                            title: k.short_title,
+                                                            agency: k.agency_name,
+                                                            request_id: k.request_id,
+                                                            sectionName: k.section_name,
+                                                            start: k.start_date,
+                                                        })}>Save</Button>
+                                            </TableCell>
+                                        </TableRow>)
+                                })}
+                            </TableBody>
+                            :
+                            <TableBody>
+                                {this.state.data.map((k, i) => {
+                                    return (
+                                        <TableRow key={i}>
+                                            <TableCell>{k.section_name}</TableCell>
+                                            <TableCell>{k.request_id}</TableCell>
+                                            <TableCell>{k.agency_name}</TableCell>
+                                            <TableCell>{k.shot_title}</TableCell>
+                                            <TableCell>{k.start_date}</TableCell>
+                                            <TableCell>
+                                                <Button color="secondary" variant="raised"
+                                                        onClick={() => this.handleRemoveBtnClick(k.id)}>REMOVE</Button>
+                                            </TableCell>
+                                        </TableRow>)
+                                })}
+                            </TableBody>}
                     </Table>
                 </Paper>
             </div>
