@@ -2,7 +2,18 @@
   "name": "crol",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:8080",
+  "proxy": {
+    "/city": {
+      "target": "http://localhost:8080"
+    },
+    "/switch":{
+      "target": "http://localhost:8081/",
+      "pathRewrite": {
+        "^/switch": "/"
+      }
+    }
+  },
+
   "dependencies": {
     "axios": "^0.18.0",
     "material-ui": "^1.0.0-beta.38",
@@ -15,6 +26,5 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
-    
   }
 }

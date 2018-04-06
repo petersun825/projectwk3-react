@@ -61,8 +61,12 @@ class TableComponent extends Component {
     }
 
     handleSaveBtnClick = async (record) => {
+        
+        
         try {
-            const newCityResponse = await axios.post('/city', record)
+            
+            const newCityResponse = await axios.post('/city', record )
+            console.log(newCityResponse);
             const updatedCityList = [...this.state.city]
             updatedCityList.push(newCityResponse.data)
             this.setState({city: updatedCityList})
@@ -71,28 +75,9 @@ class TableComponent extends Component {
             console.log(error);
         }
     }
-    //         axios.get('/city/${id}', newCity);
-    //         console.log("after .patch statement");
-    //          catch (error) {
-    //         console.log("trouble retriving information");
-    //         console.log(error);
-    //     }
-    // }
-    // handleSaveBtnClick(data) {
-    //     fetch(`${HOST}`, {
-    //         method: 'POST',
-    //         headers: {
-    //             'Accept': 'application/json',
-    //             'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify(data)
-    //     }).then(result => {
-    //         console.log('SAVED');
-    //     });
-    // }
 
     handleRemoveBtnClick(id) {
-        axios.get(`/city/${HOST}${id}`, {
+        axios.get(`/city/${id}`, {
             method: 'DELETE'
         }).then(result => {
             if (result.status === 200) {
@@ -108,28 +93,21 @@ class TableComponent extends Component {
 
 
     handleViewUsers() {
-        let {showingSaved} = this.state;
+
+        let { showingSaved } = this.state;
         if (!showingSaved) {
-            fetch(HOST)
-                .then(response => response.json())
-                .then(data => {
-                    this.setState({data: data, showingSaved: !this.state.showingSaved})
-                })
-                .catch(error => {
-                    alert('Can not load data ' + error.status)
-                });
-        } 
-        // else {
-        //     fetch(`https://randomuser.me/api/?inc=id,name,login&results=${this.state.limit}&nat=us`)
-        //         .then(response => response.json())
-        //         .then(data => {
-        //             this.setState({data: data.results, showingSaved: !this.state.showingSaved});
-        //         })
-        //         .catch(error => {
-        //             alert('Can not load data ' + error.status)
-        //         });
-        // }
+            axios.get('/switch').then(response => {
+                this.setState({data: response.data, showingSaved: !this.state.showingSaved})
+                console.log(response)
+            
+            }).catch(error => {
+                    console.log(error)
+                    // alert('Can not load data ' + error.status)
+                });   
+        } else { this.getData()}
     }
+        
+    
 
     render() {
         const {classes} = this.props;
@@ -163,11 +141,11 @@ class TableComponent extends Component {
                                             <TableCell>
                                                 <Button color="primary" variant="raised"
                                                         onClick={() => this.handleSaveBtnClick({
-                                                            // title: k.short_title,
-                                                            // agency: k.agency_name,
-                                                            // request_id: k.request_id,
-                                                            // sectionName: k.section_name
-                                                         
+                                                            short_title: k.short_title,
+                                                            agency_name: k.agency_name,
+                                                            request_id: k.request_id,
+                                                            section_name: k.section_name
+                                    
                                                         })}>Save</Button>
                                             </TableCell>
                                         </TableRow>)
