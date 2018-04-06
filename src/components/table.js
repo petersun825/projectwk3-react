@@ -3,6 +3,7 @@ import Header from './header'
 import {Button, Paper, Table, TableBody, TableCell, TableHead, TableRow, withStyles} from "material-ui";
 import {HOST} from "../configs/config";
 import axios from "axios";
+// import City from '/city'
 
 const styles = theme => ({
     root: {
@@ -35,11 +36,20 @@ class TableComponent extends Component {
         fetch(`https://data.cityofnewyork.us/resource/buex-bi6w.json?$limit=${this.state.limit}`)
             .then(response => response.json())
             .then(data => {
-                this.setState({data});
+                this.setState({ data, showingSaved: false});
             })
             .catch(error => {
                 alert('Can not load data ' + error.status)
             });
+    }
+    async componentWillMount(){
+        try {
+            const response = await axios.get('/city')
+            this.setState({city:response.data})
+        } catch (error){
+            console.log('Error retrieving city!')
+            console.log(error)
+        }
     }
 
     handleLimit(e) {
@@ -50,15 +60,24 @@ class TableComponent extends Component {
         }, 700);
     }
 
-    handleSaveBtnClick = async (newCity, Id) => {
+    handleSaveBtnClick = async (record) => {
         try {
-            fetch.path('/city/${id}', newCity);
-            console.log("after .patch statement");
+            const newCityResponse = await axios.post('/city', record)
+            const updatedCityList = [...this.state.city]
+            updatedCityList.push(newCityResponse.data)
+            this.setState({city: updatedCityList})
         } catch (error) {
             console.log("trouble retriving information");
             console.log(error);
         }
     }
+    //         axios.get('/city/${id}', newCity);
+    //         console.log("after .patch statement");
+    //          catch (error) {
+    //         console.log("trouble retriving information");
+    //         console.log(error);
+    //     }
+    // }
     // handleSaveBtnClick(data) {
     //     fetch(`${HOST}`, {
     //         method: 'POST',
@@ -73,7 +92,7 @@ class TableComponent extends Component {
     // }
 
     handleRemoveBtnClick(id) {
-        fetch(`${HOST}${id}`, {
+        axios.get(`/city/${HOST}${id}`, {
             method: 'DELETE'
         }).then(result => {
             if (result.status === 200) {
@@ -99,16 +118,17 @@ class TableComponent extends Component {
                 .catch(error => {
                     alert('Can not load data ' + error.status)
                 });
-        } else {
-            fetch(`https://randomuser.me/api/?inc=id,name,login&results=${this.state.limit}&nat=us`)
-                .then(response => response.json())
-                .then(data => {
-                    this.setState({data: data.results, showingSaved: !this.state.showingSaved});
-                })
-                .catch(error => {
-                    alert('Can not load data ' + error.status)
-                });
-        }
+        } 
+        // else {
+        //     fetch(`https://randomuser.me/api/?inc=id,name,login&results=${this.state.limit}&nat=us`)
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             this.setState({data: data.results, showingSaved: !this.state.showingSaved});
+        //         })
+        //         .catch(error => {
+        //             alert('Can not load data ' + error.status)
+        //         });
+        // }
     }
 
     render() {
@@ -143,17 +163,17 @@ class TableComponent extends Component {
                                             <TableCell>
                                                 <Button color="primary" variant="raised"
                                                         onClick={() => this.handleSaveBtnClick({
-                                                            title: k.short_title,
-                                                            agency: k.agency_name,
-                                                            request_id: k.request_id,
-                                                            sectionName: k.section_name,
-                                                            start: k.start_date,
+                                                            // title: k.short_title,
+                                                            // agency: k.agency_name,
+                                                            // request_id: k.request_id,
+                                                            // sectionName: k.section_name
+                                                         
                                                         })}>Save</Button>
                                             </TableCell>
                                         </TableRow>)
                                 })}
                             </TableBody>
-                            :
+                            {/* :
                             <TableBody>
                                 {this.state.data.map((k, i) => {
                                     return (
@@ -169,7 +189,7 @@ class TableComponent extends Component {
                                             </TableCell>
                                         </TableRow>)
                                 })}
-                            </TableBody>}
+                            </TableBody>} */}
                     </Table>
                 </Paper>
             </div>
