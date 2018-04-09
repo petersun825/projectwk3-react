@@ -61,11 +61,8 @@ class TableComponent extends Component {
     }
 
     handleSaveBtnClick = async (record) => {
-        
-        
         try {
-            
-            const newCityResponse = await axios.post('/city', record )
+            const newCityResponse = await axios.post('/city', record)
             console.log(newCityResponse);
             const updatedCityList = [...this.state.city]
             updatedCityList.push(newCityResponse.data)
@@ -77,14 +74,14 @@ class TableComponent extends Component {
     }
 
     handleRemoveBtnClick(id) {
-        axios.get(`/city/${id}`, {
-            method: 'DELETE'
+         axios.get(`/city/${id}`, {
+        method: 'DELETE'
         }).then(result => {
             if (result.status === 200) {
                 let temp = this.state.data;
                 var indexOf = temp.indexOf(this.state.data.find(k => k.id === id));
                 temp.splice(indexOf,1);
-                this.setState({data: temp});
+                this.setState({city: temp});
             }
         }).catch(error => {
             console.log(error, ' ERROR ');
@@ -93,7 +90,6 @@ class TableComponent extends Component {
 
 
     handleViewUsers() {
-
         let { showingSaved } = this.state;
         if (!showingSaved) {
             axios.get('/switch').then(response => {
@@ -102,7 +98,7 @@ class TableComponent extends Component {
             
             }).catch(error => {
                     console.log(error)
-                    // alert('Can not load data ' + error.status)
+                    alert('Can not load data ' + error.status)
                 });   
         } else { this.getData()}
     }
@@ -139,7 +135,7 @@ class TableComponent extends Component {
                                             <TableCell>{k.short_title}</TableCell>
                                             <TableCell>{k.start_date}</TableCell>
                                             <TableCell>
-                                                <Button color="primary" variant="raised"
+                                            <Button color="primary" variant="raised"
                                                         onClick={() => this.handleSaveBtnClick({
                                                             short_title: k.short_title,
                                                             agency_name: k.agency_name,
@@ -147,6 +143,10 @@ class TableComponent extends Component {
                                                             section_name: k.section_name
                                     
                                                         })}>Save</Button>
+                                            <Button color="secondary" variant="raised"
+                                                        onClick={() => this.handleRemoveBtnClick(
+                                                            k.id
+                                                        )}>Delete</Button>
                                             </TableCell>
                                         </TableRow>)
                                 })}
