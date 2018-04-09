@@ -3,7 +3,7 @@ full stack microservice application with backend and front end
   
   
 # getting started
-1. download or git clone backend(microservice) repository.  <a href:"https://github.com/petersun825/p3-microservice-fullstack">Link</a>
+1. download or git clone backend(microservice) repository.  Link: https://github.com/petersun825/p3-microservice-fullstack"
 2. Open terminal and access folder.
 3. run 'docker-compose up'
 4. Check microservice is up and running.  Localhost:8761 - eureka server, localhost:8080: Zuul API gateway, localhost:8081: City Api gateway with Postgres Database.
